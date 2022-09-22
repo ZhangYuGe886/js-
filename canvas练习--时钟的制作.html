@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			canvas{
+				display: block;
+				margin: 0 auto;
+				/*border: solid 1px red;*/
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas" width="800" height="800"></canvas>
+		<script>
+			var canvas=document.getElementById("canvas");
+			var context=canvas.getContext("2d");
+			var width=canvas.width;//定义全局的宽和高以及半径，设置为变量，方便后面使用
+			var height=canvas.height;
+			var r= width / 2;
+			function fun(){//在这个函数中画了时钟的外部边框和刻度
+				context.save()//调用save()保存当前环境的方法，在结束的时候记得调用restore()返回之前保存过的路径状态和属性
+				context.translate(r,r);//调用translate()方法改变画布初始（0,0）坐标。改为（r,r)为画布初始的坐标。方便后面的代码编写
+				context.beginPath();//开始绘制最外层边框
+				context.strokeStyle="purple";//设置边框颜色
+				context.lineWidth=12;//设置边框宽度
+				context.arc(0,0,r-12,0, Math.PI * 2)//开始绘制形状
+				context.closePath();//结束绘制路径
+				context.stroke();//绘制圆的边框
+				
+				var hour=[3,4,5,6,7,8,9,10,11,12,1,2];//定义hour数组，存放的数字从画圆的初始位置绘制，所以从3开始
+				for(var i=0;i<hour.length;i++){//遍历数组的长度
+					var rad=Math.PI * 2 / 12 *i;   //算出每个小时数字在圆中的弧度,并定义一个变量去接收
+					var x=Math.cos(rad)*(r-70);//每个小时的x横坐标值就等于半径*cos(弧度)
+					var y=Math.sin(rad)*(r-70);//每个小时的y横坐标值就等于半径*sin(弧度)
+					context.font="30px Arial";//设置字体大小及样式
+					context.fillStyle="darkslategray";//设置字体颜色
+					context.textAlign="center";//设置字体水平居中
+					context.textBaseline="middle";//设置字体垂直居中
+					context.fillText(hour[i],x,y)//写出字体
+				}
+				for(var j=0;j<60;j++){//画出刻度,同上
+					var rad1=Math.PI * 2 / 60 * j;
+					var x1=Math.cos(rad1)*(r-40);
+					var y1=Math.sin(rad1)*(r-40);
+					context.beginPath();
+					if(j % 5 == 0){//刻度时小时的时候
+						context.fillStyle="purple";
+						context.arc(x1,y1,10,0,Math.PI*2);
+						context.closePath();
+						context.fill();
+					}
+					else{
+						context.fillStyle="mediumslateblue";
+						context.arc(x1,y1,5,0,Math.PI*2);
+						context.closePath();
+						context.fill();
+					}
+				}
+			}
+			function DrawHour(hour,minute){//画时针
+				context.save();//画之前 保存环境
+				context.beginPath();
+				var rad = Math.PI * 2 / 12 * hour;	
+				var radmin=Math.PI * 2 / 12 / 60 * minute;//这里要考虑分针对时针的影响
+				context.lineWidth = 2;
+				context.lineCap = "round";
+				context.rotate(rad + radmin);//调用方法rotate（）旋转对应的弧度
+				context.moveTo(-7,50);
+				context.lineTo(4,45);
+				context.lineTo(1,-r/2);
+				context.lineTo(-3,-r/2+5);
+				context.fill();
+				context.restore();//画完之后返回之前的环境；
+			}
+			function DrawMinute(minute){//画分针，同上
+				context.save();
+				context.beginPath();
+				context.fillStyle="indigo"
+				var rad = Math.PI * 2 / 60 * minute;	
+				context.lineWidth = 2;
+				context.lineCap = "round";
+				context.rotate(rad);
+				context.moveTo(-5,50);
+				context.lineTo(3,45);
+				context.lineTo(2,-r+90);
+				context.lineTo(-1,-r+95);
+				context.fill();
+				context.restore();
+			}
+			function DrawSecond(second){//画秒针
+				context.save();
+				context.beginPath();
+				context.fillStyle="lightslategray"
+				var rad = Math.PI * 2 / 60 * second;	
+				context.lineWidth = 2;
+				context.lineCap = "round";
+				context.rotate(rad);
+				context.moveTo(-3,50);
+				context.lineTo(1,45);
+				context.lineTo(1,-r+50);
+				context.lineTo(-1,-r+55);
+				context.fill();
+				context.restore();
+			}
+			function DrawCenter(){//这里画了一个针的小圆点
+				context.beginPath();
+				context.fillStyle="black"
+				context.arc(0,0,5,0,Math.PI * 2);
+				context.closePath();
+				context.fill();
+			}
+			function DrawAll(){//绘制所有的时候，调用所有的函数（并把定义好的参数传到对应的函数中）
+				context.clearRect(0,0,width,height);//每次绘制完成后清空画布
+				var date=new Date();//获取当前日期
+				var hour=date.getHours();//获取当前日期的小时
+				var minutes=date.getMinutes();//获取当前日期的分钟
+				var second=date.getSeconds();
+				fun();
+				DrawHour(hour,minutes);
+				DrawMinute(minutes);
+				DrawSecond(second);
+				DrawCenter();
+				context.restore();//将返回之前的环境
+			}
+			DrawAll();//第一次显示时钟调用函数
+			setInterval(DrawAll,1000)//采用定时器调用绘制所有的函数，让时钟动起来
+		</script>
+	</body>
+</html>
+
