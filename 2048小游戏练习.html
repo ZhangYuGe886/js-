@@ -1,0 +1,408 @@
+<!DOCTYPE html>//HTML部分
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="css/2048.css" />
+	</head>
+	<body>
+		<div class="all">
+			<div class="title">
+				SOCRE:<span id="score-begin">0</span>
+			</div>
+			<div class="box-all">
+				<!--第一行-->
+				<div class="cell" id="c00"></div>
+				<div class="cell" id="c01"></div>
+				<div class="cell" id="c02"></div>
+				<div class="cell" id="c03"></div>
+				<!--第二行-->
+				<div class="cell" id="c10"></div>
+				<div class="cell" id="c11"></div>
+				<div class="cell" id="c12"></div>
+				<div class="cell" id="c13"></div>
+				<!--第三行-->
+				<div class="cell" id="c20"></div>
+				<div class="cell" id="c21"></div>
+				<div class="cell" id="c22"></div>
+				<div class="cell" id="c23"></div>
+				<!--第四行-->
+				<div class="cell" id="c30"></div>
+				<div class="cell" id="c31"></div>
+				<div class="cell" id="c32"></div>
+				<div class="cell" id="c33"></div>
+			</div>
+		</div>
+		<div id="gameover">
+			<div class="over">
+				<p>GAME OVER!!</p><br />
+				SCORE: <span id="score-over"></span> <br />
+				<a href="#" style="font-size: 40px;" id="try" onclick="fun()">TYR AGAIN</a>
+			</div>
+		</div>
+		<script type="text/javascript" src="js/2048.js" ></script>
+	</body>
+</html>
+
+我的CSS部分
+.all{
+	margin: 0 auto;
+	margin-top: 150px;
+}
+body{
+	background-color: #FAF8EF;
+}
+#score{
+	width: 500px;
+	height: 300px;
+}
+.title{
+	margin-top: 100px;
+	width: 500px;
+	height: 100px;
+	font-size: 50px;
+	font-weight: bold;
+	text-align:left;
+	line-height: 100px;
+	margin: 0 auto;
+}
+.box-all{
+	width: 500px;
+	height: 500px;
+	background-color: #bbada0;
+	border-radius: 8px;
+	margin: 0 auto;
+}
+.cell{
+	width: 100px;
+	height: 100px;
+	margin: 20px 0  0 20px;
+	background-color:#ccc0b3 ;
+	float: left;
+	border-radius:5px;
+	font-size: 50px;
+	text-align: center;
+	line-height: 100px;
+	font-weight: bold;
+	color: #fff;
+}
+.n2{background-color:#eee3da;color:#776e65}
+.n4{background-color:#ede0c8;color:#776e65}
+.n8{background-color:#f2b179}
+.n16{background-color:#f59563}
+.n32{background-color:#f67c5f}
+.n64{background-color:#f65e3b}
+.n128{background-color:#edcf72}
+.n256{background-color:#edcc61}
+.n512{background-color:#9c0}
+.n1024{background-color:#33b5e5;font-size:40px}
+.n2048{background-color:#09c;font-size:40px}
+.n4096{background-color:#a6c;font-size:40px}
+.n8192{background-color:#93c;font-size:40px}
+#gameover{
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	background-color: rgba(23,24,25,.5);
+	display: none;
+}
+.over{
+	width: 500px;
+	height: 300px;
+	margin: 0 auto;
+	margin-top: 400px;
+	text-align: center;
+	font-size: 50px;
+	font-weight: bold;
+}
+.over a{
+	display: inline-block;
+	padding: 10px;
+	background-color: #8F7A65;
+	text-decoration: none;
+	color:white;
+	border-radius: 9px;
+}
+
+	data:[],
+	score:0,
+	gamerunning:1,//游戏进行时的状态
+	gameover:0,//游戏结束时的状态
+	status:1,//定义对象game的属性
+	start:function(){//定义游戏开始的时候的方法
+		game.status=game.gamerunning;//初始化游戏状态
+		game.score=0;//初始化游戏分数
+		game.data=[];//初始化数据，因为数据是一个二维数组，所以遍历一遍进行初始化
+		for(var r=0;r<4;r++){
+			game.data[r]=[];
+			for(var c=0;c<4;c++){
+				game.data[r][c]=0;
+			}
+		}
+//		game.data = [     
+//			[666,0,0,0],
+//			[0,0,0,666],
+//			[0,0,8,0],
+//			[0,0,0,666]
+//		];
+		game.randomNum();//游戏开始了，生成两个随机数（2和4）在随意位置
+		game.randomNum();
+		game.dataView();//调用方法将数据显示到页面中去
+	},
+	randomNum:function(){//1.定义一个生成随机数的方法，要生成的随机数(2和4)必须在数组的空的位置；
+						//2.也就是当数组为空时，才能把生成的随机数复制给这个空数组；
+						//3.这个空的位置也是随机产生的。
+						//4.赋值给空位置后就要结束本次循环
+						//5.随机产生位置要找到空位置，就要把代码包裹在一个死循环for(,,)里；
+		for(;;){
+			var r=Math.floor(Math.random()*4);
+			var c=Math.floor(Math.random()*4);
+			if(game.data[r][c]==0){
+				num=Math.random()>0.5?2:4;//生成2或4的随机数赋给num;
+				game.data[r][c]=num;//再赋值给随机产生的空位置；
+				break;
+			}
+		}
+	},
+	dataView:function(){   //把数组里面的数据显示到页面中
+		for(var r = 0;r<4;r++){
+			for(var c = 0;c<4;c++){
+				var div = document.getElementById("c" + r + c);  //找到对应的单元格
+				if(game.data[r][c] != 0){  //如果不为0
+					div.innerHTML = game.data[r][c];
+					div.className = "cell n" + game.data[r][c];//更改class，以便变化CSS中的样式；
+				}else{
+					div.innerHTML = "";
+					div.className = "cell";
+				}
+			}
+		}
+		document.getElementById("score-begin").innerHTML=game.score;
+		if(game.status==game.gameover){
+			document.getElementById("score-over").innerHTML=game.score;
+			document.getElementById("gameover").style.display="block";
+		}
+		else{
+			document.getElementById("gameover").style.display="none";
+		}
+	},
+	isgameover:function(){
+		//1数组有空值，游戏未结束
+		//2左右有相同的值，游戏未结束
+		//3上下有相同的值，游戏未结束
+		//首先遍历数组的值，再去判断
+		for(var r=0;r<4;r++){
+			for(var c=0;c<4;c++){
+				if(game.data[r][c]==0){
+					return false;
+				}if(c<3){
+					if(game.data[r][c]==game.data[r][c+1]){//左右有相同的值
+						return false;
+					}
+				}if(r<3){
+					if(game.data[r][c]==game.data[r+1][c]){//上下有相同的值
+						return false;
+					}
+				}
+			}	
+		}
+		return true;
+	},
+	moveLeft:function(){//定义向左移动的方法，对比移动前和移动后的状态
+		var before=game.data.toString();//引用类型（对象）不能进行比较，但是原始类型可以。所以在这里把数组转换成字符串去比较
+		for(var r=0;r<4;r++){
+			game.moveLeftInRow(r);//在此处要遍历四行，我们只需写出一行是如何向左移动的就行。
+			//故在此处调用了下面封装好的方法传参进去 ，直接调用。
+		}
+		var after=game.data.toString();
+		if(before!=after){ //移动前不等于移动后，会产生新的随机数，此时还要判断游戏是否结束,还要调用数据显示的方法
+			game.randomNum();
+			if(game.isgameover()){
+				game.status=game.gameover;
+			}
+			game.dataView(); //游戏没结束调用方法
+		}
+	},
+	moveLeftInRow:function(r){//这是判断一行中的数据在左移的时候如何处理的
+		for(var c=0;c<3;c++){//左移时只需判断前面三个数，先遍历。
+			var nextc=game.getNextInRow(r,c);//在循环中调用下面分装好的方法，传入参数，直接调用
+											//目的是判断当前位置的数和它下一位的数比较。
+			if(nextc!=-1){//如果下一位数存在
+				if(game.data[r][c]==0){//当当前位置的数为空时
+					game.data[r][c]=game.data[r][nextc];//直接把它的下一位数赋给当前位置；
+					game.data[r][nextc]=0;//并把下一位赋值空；
+					c--;//让索引值减一，到下一位去判断
+				}else if(game.data[r][c]==game.data[r][nextc]){//如果当前位置的数等于下一位数
+					game.data[r][c] *=2;//给当前位置的数乘以2
+					game.score+=game.data[r][c];//分数递加
+					game.data[r][nextc]=0;//下一位置的值清空
+				}
+			}
+			else{
+				break;//其余情况退出循环
+			}
+		}
+	},
+	getNextInRow:function(r,c){//此处封装了一个方法，去找下一位数值
+		for(var i=c+1;i<4;i++){//在此处定义的i是我们要找的下一位数值的索引下标
+			if(game.data[r][i]!=0){//如果找到了这个不为空的数值
+				return i;//那么就返回它的索引值
+			}
+		}
+		return -1;//没找到的话就返回一个标志
+	},
+	//下面的往上移、下移、右移，原理相同，就是数组的遍历方向有一定变化
+	moveTop:function(){
+		var before=game.data.toString();
+		for(c=0;c<4;c++){
+			game.moveTopIncol(c);
+		}
+		var after=game.data.toString();
+		if(before!=after){
+			game.randomNum();
+			if(game.isgameover()){
+				game.status=game.gameover;
+			}
+			game.dataView();
+		}
+	},
+	moveTopIncol:function(c){
+		for(var r=0;r<3;r++){
+			var nextc=game.getNextInCol(r,c);
+			if(nextc!=-1){
+				if(game.data[r][c]==0){
+					game.data[r][c]=game.data[nextc][c];
+					game.data[nextc][c]=0;
+					r--;
+				}
+				else if(game.data[r][c]==game.data[nextc][c]){
+					game.data[r][c]*=2;                                                                                                                                                                                                                                            
+					game.score+=game.data[r][c];
+					game.data[nextc][c]=0;
+				}	
+			}
+			else{
+				break;
+			}
+		}	                                            
+	},
+	getNextInCol:function(r,c){               
+		for(var i=r+1;i<4;i++){
+			if(game.data[i][c]!=0){
+				return i;
+			}
+		}
+		return -1;
+	},
+	moveRight:function(){
+		var before=game.data.toString();
+		for(var r=3;r>=0;r--){
+			game.moveRightInRow(r);
+		}
+		var after=game.data.toString();
+		if(before!=after){//移动前不等于移动后，会产生新的随机数，此时还要判断游戏是否结束,还要调用数据显示的方法
+			game.randomNum();
+			if(game.isgameover()){
+				game.status=game.gameover;
+			}
+			game.dataView();
+		}
+	},
+	moveRightInRow:function(r){
+		for(var c=3;c>0;c--){
+			var nextc1=game.getNextInRightRow(r,c);
+			if(nextc1!=-1){
+				if(game.data[r][c]==0){
+					game.data[r][c]=game.data[r][nextc1];
+					game.data[r][nextc1]=0;
+					c++;
+				}
+				else if(game.data[r][c]==game.data[r][nextc1]){
+					game.data[r][c] *=2;
+					game.score+=game.data[r][c];
+					game.data[r][nextc1]=0;
+				}
+			}
+		    else{
+				break;
+			}
+		}    
+	},
+	getNextInRightRow:function(r,c){
+		for(var i=c-1;i>=0;i--){
+			if(game.data[r][i]!=0){
+				return i;
+			}
+		}
+		return -1;
+	},
+	moveBottom:function(){
+		var before=game.data.toString();
+		for(var c=0;c<4;c++){
+			game.moveBottomInCow(c);
+		}
+		var after=game.data.toString();
+		if(before!=after){//移动前不等于移动后，会产生新的随机数，此时还要判断游戏是否结束,还要调用数据显示的方法
+			game.randomNum();
+			if(game.isgameover()){
+				game.status=game.gameover;
+			}
+			game.dataView();
+		}
+	},
+	moveBottomInCow:function(c){
+		for(var r=3;r>0;r--){
+			var nextc2=game.getNextInBottomCow(r,c);
+			if(nextc2!=-1){
+				if(game.data[r][c]==0){
+					game.data[r][c]=game.data[nextc2][c];
+					game.data[nextc2][c]=0;
+					r++;
+				}
+				else if(game.data[r][c]==game.data[nextc2][c]){
+					game.data[r][c] *=2;
+					console.log(game.data[r][c])
+					game.score += game.data[r][c];
+					game.data[nextc2][c]=0;
+				}
+			}
+		    else{
+				break;
+			}
+		}    
+	},
+	getNextInBottomCow:function(r,c){
+		for(var i=r-1;i>=0;i--){
+			if(game.data[i][c]!=0){
+				return i;
+			}
+		}
+		return -1;
+	}
+}
+game.start();//调用函数
+console.log(game.score);
+//console.log(game.data);
+document.οnkeydοwn=function(event){//写键盘事件
+	var event=event || window.event;
+	if(event.keyCode==37){
+		game.moveLeft()
+	}
+	if(event.keyCode==38){
+		game.moveTop();
+	}
+	if(event.keyCode==39){
+		game.moveRight();
+	}
+	if(event.keyCode==40){
+		game.moveBottom();
+	}
+}
+document.getElementById("try");//当游戏game over 的时候点击try再来一遍
+function fun(){
+	game.start();
+}
+
+
